@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import Contact from "../models/contact.js";
 
 async function getAllContacts (req, res, next) {
@@ -11,31 +12,38 @@ async function getAllContacts (req, res, next) {
 
 async function getOneContact (req, res, next) {
     const contactId = req.params.id;
-   try { const contact = await Contact.findById(contactId);
+   try {
+    if (!isValidObjectId(contactId)) {
+       return res.status(400).send({ message: "Invalid contact ID" });        ;
+    }
+    
+    const contact = await Contact.findById(contactId);
     if (!contact) {
-            res.status(404).send({ message: "Not found" });
-            return;
+        return res.status(404).send({ message: "Not found" });            
         }
-        res.status(200).send(contact);    
+    res.status(200).send(contact);    
    }
    catch (error) {
        next(error) }
 };
 
-async function deleteContact (req, res) {
+async function deleteContact (req, res, next) {
     const contactId = req.params.id;
     try {
+        if (!isValidObjectId(contactId)) {
+           return res.status(400).send({ message: "Invalid contact ID" });            ;
+        }
+        
         const contact = await Contact.findByIdAndDelete(contactId);
     if (!contact) {
-        res.status(404).send({ message: "Not found" });
-        return;
-    } else {
-        res.status(204).send(contact).end();
-    } }  catch (error) {
+       return res.status(404).send({ message: "Not found" });        ;
+    } 
+        res.status(204).end();
+    }  catch (error) {
         next(error) }
 }
 
-async function createContact (req, res) {
+async function createContact (req, res, next) {
     const { name, email, phone } = req.body;
     try {
         const contact = await Contact.create({ name, email, phone });
@@ -45,13 +53,18 @@ async function createContact (req, res) {
     }
  
 
-   async function updateContact (req, res) {
+   async function updateContact (req, res, next) {
     const id = req.params.id;
     const data  = req.body;
+    if (!isValidObjectId(id)) {
+        res.status(400).send({ message: "Invalid contact ID" });
+        return;
+    }    
     if (!data.name && !data.email && !data.phone) {
         return res.status(400).send({ message: "Body must have at least one field" });
         } 
-    try {
+    
+        try {
     const contact = await Contact.findByIdAndUpdate(id, data, { new: true });
     if (!contact) {
         res.status(404).send({ message: "Not found" });
@@ -63,12 +76,17 @@ async function createContact (req, res) {
         next(error) }
     }
 
-    async function updateStatusContact (req, res) {
+    async function updateStatusContact (req, res, next) {
         const id = req.params.id;
         const data  = req.body;
         if (!data.favorite) {
             return res.status(400).send({ message: "Body must have favorite field" });
             }
+        if (!isValidObjectId(id)) {
+            res.status(400).send({ message: "Invalid contact ID" });
+            return;
+        }
+        
         try {
         const contact = await Contact.findByIdAndUpdate(id, data, { new: true });
         if (!contact) {
