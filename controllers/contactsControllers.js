@@ -55,6 +55,7 @@ async function createContact (req, res, next) {
 
    async function updateContact (req, res, next) {    
     const data  = req.body;
+    const id = req.params.id;
     if (!isValidObjectId(id)) {
         res.status(400).send({ message: "Invalid contact ID" });
         return;
@@ -64,9 +65,11 @@ async function createContact (req, res, next) {
         } 
     
         try {
-    const contact = await Contact.findByIdAndUpdate({_id: id, owner: req.user.id}, data, { new: true });
+    const contact = await Contact.findByIdAndUpdate(id, data, { new: true });
+    
+    
     if (!contact) {
-        res.status(404).send({ message: "Not found" });
+        res.status(404).send({ message: "user Not found" });
         return;
     }
     res.status(200).send(contact);
