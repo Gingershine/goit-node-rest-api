@@ -1,11 +1,11 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import "dotenv/config";
 import contactsRouts from "./routes/contactsRouter.js";
 import usersRouts from "./routes/usersRouter.js";
 import "./db.js"
 import authMiddleware from "./middlewares/auth.js";
+import path from "path";
 
 const app = express();
 
@@ -15,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/contacts", authMiddleware, contactsRouts);
 app.use("/api/users", usersRouts);
+app.use("/avatars", express.static(path.resolve("public", "avatars")));
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
