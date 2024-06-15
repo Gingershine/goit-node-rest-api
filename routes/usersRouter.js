@@ -4,7 +4,7 @@ import authMiddleware from "../middlewares/auth.js";
 import validateBody from "../helpers/validateBody.js";
 import { createUserSchema, loginUserSchema, subscriptionSchema } from "../schemas/usersSchema.js";
 import uploadMiddleware from "../middlewares/upload.js";
-import updateAvatar from "../controllers/avatarComtrollers.js";
+import AvatarController from "../controllers/avatarComtrollers.js";
 
 
 
@@ -16,6 +16,8 @@ router.post("/login", validateBody(loginUserSchema), jsonParser, AuthController.
 router.post("/logout", authMiddleware, AuthController.logout);
 router.get("/current", authMiddleware, AuthController.getCurrentUser);
 router.patch("/", validateBody(subscriptionSchema), authMiddleware, AuthController.updateSubscription);
-router.patch("/avatars", authMiddleware, uploadMiddleware.single("avatar"), updateAvatar);
+router.patch("/avatars", authMiddleware, uploadMiddleware.single("avatar"), AvatarController.updateAvatar);
+router.get("/verify/:verificationToken", AvatarController.verifyEmail);
+router.post("/verify", AvatarController.sendEmail);
 
 export default router;
